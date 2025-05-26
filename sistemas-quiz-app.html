@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistemas Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .section {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px 0;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Portada */
+        .portada {
+            text-align: center;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            color: white;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .title {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .integrantes {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .integrantes h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .nombres {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .nombre {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .nombre:hover {
+            transform: scale(1.05);
+        }
+
+        /* Conceptos */
+        .concepto {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .concepto h3 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .concepto-icon {
+            font-size: 2.5rem;
+            margin-right: 15px;
+        }
+
+        .concepto p {
+            line-height: 1.8;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .caracteristicas {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .caracteristicas h4 {
+            color: #4a4a4a;
+            margin-bottom: 15px;
+        }
+
+        .caracteristicas ul {
+            list-style: none;
+        }
+
+        .caracteristicas li {
+            padding: 8px 0;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .caracteristicas li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+
+        /* Quiz */
+        .quiz-container {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+        }
+
+        .pregunta {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .pregunta h4 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #2d3436;
+        }
+
+        .opciones {
+            display: grid;
+            gap: 15px;
+        }
+
+        .opcion {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .opcion:hover {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            transform: translateX(5px);
+        }
+
+        .opcion.selected {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+
+        .opcion.incorrect {
+            background: #f44336;
+            color: white;
+            border-color: #f44336;
+        }
+
+        .opcion.correct {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+
+        .quiz-resultado {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            margin-top: 30px;
+        }
+
+        .quiz-resultado h3 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .quiz-resultado .puntuacion {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #4caf50;
+            margin: 20px 0;
+        }
+
+        /* Agradecimientos */
+        .agradecimientos {
+            text-align: center;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .agradecimientos h2 {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            color: #2d3436;
+        }
+
+        .agradecimientos p {
+            font-size: 1.3rem;
+            line-height: 2;
+            margin-bottom: 20px;
+        }
+
+        .corazones {
+            font-size: 3rem;
+            margin: 30px 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Botones */
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .navegacion {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .nombres {
+                grid-template-columns: 1fr;
+            }
+            
+            .concepto h3 {
+                font-size: 1.5rem;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- PORTADA -->
+        <div class="section active portada" id="portada">
+            <h1 class="title">🎮 SISTEMAS QUIZ 🎮</h1>
+            <p class="subtitle">Tu aventura educativa en el mundo de los Sistemas Operativos</p>
+            
+            <div class="integrantes">
+                <h3>👥 Integrantes del Proyecto</h3>
+                <div class="nombres">
+                    <div class="nombre">🐰 NOE CONEJO</div>
+                    <div class="nombre">⚡ WESLEY MALES</div>
+                    <div class="nombre">🚀 ERICK FUERES</div>
+                    <div class="nombre">💫 DAVID POTOSI</div>
+                </div>
+            </div>
+            
+            <div class="navegacion">
+                <button class="btn" onclick="mostrarSeccion('conceptos')">
+                    🚀 Comenzar Aventura
+                </button>
+            </div>
+        </div>
+
+        <!-- CONCEPTOS -->
+        <div class="section" id="conceptos">
+            <h2 style="text-align: center; font-size: 3rem; margin-bottom: 40px; color: #667eea;">
+                📚 Conceptos de Sistemas Operativos
+            </h2>
+
+            <div class="concepto">
+                <h3><span class="concepto-icon">💻</span>¿Qué es un Sistema Operativo?</h3>
+                <p>Un sistema operativo (SO) es el software fundamental que administra los recursos de hardware y software de una computadora. Actúa como intermediario entre los usuarios y el hardware, proporcionando una interfaz que permite a las personas y aplicaciones interactuar con el sistema de manera eficiente.</p>
+                
+                <div class="caracteristicas">
+                    <h4>🔧 Funciones principales:</h4>
+                    <ul>
+                        <li>Gestión de procesos y memoria</li>
+                        <li>Administración de archivos y directorios</li>
+                        <li>Control de dispositivos de entrada/salida</li>
+                        <li>Seguridad y control de acceso</li>
+                        <li>Interfaz de usuario</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="concepto">
+                <h3><span class="concepto-icon">🤖</span>Android - El Gigante Móvil</h3>
+                <p>Android es un sistema operativo basado en Linux, desarrollado principalmente por Google. Es el sistema operativo móvil más utilizado en el mundo, diseñado especialmente para dispositivos táctiles como smartphones y tablets.</p>
+                
+                <div class="caracteristicas">
+                    <h4>🌟 Características destacadas:</h4>
+                    <ul>
+                        <li>Código abierto y gratuito</li>
+                        <li>Google Play Store con millones de aplicaciones</li>
+                        <li>Personalización extrema</li>
+                        <li>Integración con servicios de Google</li>
+                        <li>Soporte para múltiples fabricantes</li>
+                        <li>Widgets interactivos en pantalla principal</li>
+                    </ul>
+                </div>
+                
+                <p><strong>Versiones populares:</strong> Desde Android 1.0 hasta Android 14, cada versión con nombres de postres (Cupcake, Donut, KitKat, Oreo, etc.)</p>
+            </div>
+
+            <div class="concepto">
+                <h3><span class="concepto-icon">🍎</span>iOS - La Elegancia de Apple</h3>
+                <p>iOS es el sistema operativo móvil desarrollado por Apple exclusivamente para sus dispositivos iPhone, iPad y iPod Touch. Se caracteriza por su diseño elegante, seguridad robusta y ecosistema integrado.</p>
+                
+                <div class="caracteristicas">
+                    <h4>✨ Características distintivas:</h4>
+                    <ul>
+                        <li>Interfaz intuitiva y consistente</li>
+                        <li>App Store con aplicaciones curadas</li>
+                        <li>Actualizaciones regulares y duraderas</li>
+                        <li>Integración perfecta con productos Apple</li>
+                        <li>Seguridad y privacidad avanzadas</li>
+                        <li>Optimización específica para hardware Apple</li>
+                    </ul>
+                </div>
+                
+                <p><strong>Evolución:</strong> Desde iPhone OS 1.0 hasta iOS 17, cada versión introduce nuevas funcionalidades y mejoras de rendimiento.</p>
+            </div>
+
+            <div class="concepto">
+                <h3><span class="concepto-icon">⚖️</span>Comparación Android vs iOS</h3>
+                
+                <div class="caracteristicas">
+                    <h4>🔄 Diferencias clave:</h4>
+                    <ul>
+                        <li><strong>Personalización:</strong> Android permite mayor customización, iOS prioriza la consistencia</li>
+                        <li><strong>Hardware:</strong> Android en múltiples marcas, iOS exclusivo de Apple</li>
+                        <li><strong>Tienda de apps:</strong> Google Play más abierto, App Store más restrictivo</li>
+                        <li><strong>Actualizaciones:</strong> iOS más rápido y duradero, Android varía por fabricante</li>
+                        <li><strong>Precio:</strong> Android desde económico hasta premium, iOS principalmente premium</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="navegacion">
+                <button class="btn" onclick="mostrarSeccion('portada')">⬅️ Volver al Inicio</button>
+                <button class="btn" onclick="mostrarSeccion('quiz')">🎯 Iniciar Quiz</button>
+            </div>
+        </div>
+
+        <!-- QUIZ -->
+        <div class="section quiz-container" id="quiz">
+            <h2 style="text-align: center; font-size: 3rem; margin-bottom: 40px; color: #2d3436;">
+                🎯 Quiz de Sistemas Operativos
+            </h2>
+            
+            <div id="quiz-contenido">
+                <!-- Las preguntas se generarán dinámicamente -->
+            </div>
+            
+            <div class="navegacion">
+                <button class="btn" onclick="mostrarSeccion('conceptos')">📚 Volver a Conceptos</button>
+                <button class="btn" id="btn-finalizar" onclick="finalizarQuiz()" style="display: none;">
+                    🏆 Finalizar Quiz
+                </button>
+            </div>
+        </div>
+
+        <!-- AGRADECIMIENTOS -->
+        <div class="section agradecimientos" id="agradecimientos">
+            <h2>🎉 ¡Felicidades! 🎉</h2>
+            
+            <div class="corazones">❤️ 💙 💚 💛 💜</div>
+            
+            <p>¡Has completado exitosamente el <strong>Sistemas Quiz</strong>!</p>
+            <p>Esperamos que hayas disfrutado esta experiencia educativa y que hayas aprendido conceptos valiosos sobre sistemas operativos.</p>
+            
+            <div style="background: rgba(255, 255, 255, 0.8); padding: 30px; border-radius: 20px; margin: 40px 0;">
+                <h3 style="color: #2d3436; margin-bottom: 20px;">📱 Gracias por explorar el mundo de:</h3>
+                <p style="font-size: 1.5rem; margin: 10px 0;">🤖 <strong>Android</strong> - La libertad de personalización</p>
+                <p style="font-size: 1.5rem; margin: 10px 0;">🍎 <strong>iOS</strong> - La elegancia en tus manos</p>
+                <p style="font-size: 1.5rem; margin: 10px 0;">💻 <strong>Sistemas Operativos</strong> - El corazón de la tecnología</p>
+            </div>
+            
+            <p style="font-size: 1.4rem; font-weight: bold; color: #2d3436;">
+                ¡Gracias por ser parte de este proyecto educativo!
+            </p>
+            
+            <p style="font-style: italic; margin-top: 30px;">
+                Creado con 💖 por el equipo de Sistemas Quiz
+            </p>
+            
+            <div class="navegacion">
+                <button class="btn" onclick="reiniciarApp()">🔄 Comenzar de Nuevo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Preguntas del quiz
+        const preguntas = [
+            {
+                pregunta: "¿Cuál es la función principal de un sistema operativo?",
+                opciones: [
+                    "Crear documentos y presentaciones",
+                    "Administrar recursos de hardware y software",
+                    "Conectarse a internet únicamente",
+                    "Reproducir videos y música"
+                ],
+                correcta: 1,
+                explicacion: "El sistema operativo administra todos los recursos del computador."
+            },
+            {
+                pregunta: "¿Qué empresa desarrolló el sistema operativo Android?",
+                opciones: [
+                    "Apple",
+                    "Microsoft",
+                    "Google",
+                    "Samsung"
+                ],
+                correcta: 2,
+                explicacion: "Google adquirió y desarrolló Android como sistema operativo móvil."
+            },
+            {
+                pregunta: "¿Cuál es una característica distintiva de iOS?",
+                opciones: [
+                    "Es de código abierto",
+                    "Funciona en cualquier dispositivo",
+                    "Integración exclusiva con productos Apple",
+                    "Permite instalar apps desde cualquier fuente"
+                ],
+                correcta: 2,
+                explicacion: "iOS está diseñado exclusivamente para productos Apple y se integra perfectamente con su ecosistema."
+            },
+            {
+                pregunta: "¿Qué sistema operativo permite mayor personalización?",
+                opciones: [
+                    "iOS",
+                    "Android",
+                    "Ambos por igual",
+                    "Ninguno permite personalización"
+                ],
+                correcta: 1,
+                explicacion: "Android es conocido por su alto nivel de personalización y flexibilidad."
+            },
+            {
+                pregunta: "¿Cuál es la tienda oficial de aplicaciones de iOS?",
+                opciones: [
+                    "Google Play Store",
+                    "App Store",
+                    "Microsoft Store",
+                    "Amazon Appstore"
+                ],
+                correcta: 1,
+                explicacion: "App Store es la tienda oficial y exclusiva de aplicaciones para dispositivos iOS."
+            },
+            {
+                pregunta: "¿En qué está basado el sistema operativo Android?",
+                opciones: [
+                    "Windows",
+                    "macOS",
+                    "Linux",
+                    "Unix"
+                ],
+                correcta: 2,
+                explicacion: "Android está basado en el kernel de Linux, lo que le proporciona estabilidad y seguridad."
+            },
+            {
+                pregunta: "¿Cuál es una ventaja de las actualizaciones en iOS?",
+                opciones: [
+                    "Son opcionales para todos los dispositivos",
+                    "Llegan rápido y duran muchos años",
+                    "Solo están disponibles para dispositivos nuevos",
+                    "Se pueden personalizar completamente"
+                ],
+                correcta: 1,
+                explicacion: "iOS se caracteriza por actualizaciones rápidas y soporte prolongado para dispositivos antiguos."
+            },
+            {
+                pregunta: "¿Qué permite Android que iOS no permite fácilmente?",
+                opciones: [
+                    "Hacer llamadas telefónicas",
+                    "Instalar aplicaciones desde fuentes externas",
+                    "Usar internet",
+                    "Tomar fotografías"
+                ],
+                correcta: 1,
+                explicacion: "Android permite la instalación de APK desde fuentes externas, mientras que iOS es más restrictivo."
+            }
+        ];
+
+        let preguntaActual = 0;
+        let respuestasUsuario = [];
+        let puntuacion = 0;
+
+        function mostrarSeccion(seccion) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            
+            // Mostrar la sección solicitada
+            document.getElementById(seccion).classList.add('active');
+            
+            // Si es el quiz, generar las preguntas
+            if (seccion === 'quiz') {
+                generarQuiz();
+            }
+        }
+
+        function generarQuiz() {
+            const contenedor = document.getElementById('quiz-contenido');
+            contenedor.innerHTML = '';
+            
+            preguntas.forEach((pregunta, index) => {
+                const divPregunta = document.createElement('div');
+                divPregunta.className = 'pregunta';
+                divPregunta.innerHTML = `
+                    <h4>Pregunta ${index + 1}: ${pregunta.pregunta}</h4>
+                    <div class="opciones">
+                        ${pregunta.opciones.map((opcion, i) => `
+                            <div class="opcion" onclick="seleccionarOpcion(${index}, ${i})" data-pregunta="${index}" data-opcion="${i}">
+                                ${String.fromCharCode(65 + i)}. ${opcion}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="explicacion" id="explicacion-${index}" style="display: none; margin-top: 15px; padding: 15px; background: #e8f5e8; border-radius: 10px;">
+                        <strong>💡 Explicación:</strong> ${pregunta.explicacion}
+                    </div>
+                `;
+                contenedor.appendChild(divPregunta);
+            });
+            
+            document.getElementById('btn-finalizar').style.display = 'inline-block';
+        }
+
+        function seleccionarOpcion(pregunta, opcion) {
+            // Marcar la opción seleccionada
+            const opciones = document.querySelectorAll(`[data-pregunta="${pregunta}"]`);
+            opciones.forEach(op => op.classList.remove('selected'));
+            
+            const opcionSeleccionada = document.querySelector(`[data-pregunta="${pregunta}"][data-opcion="${opcion}"]`);
+            opcionSeleccionada.classList.add('selected');
+            
+            // Guardar la respuesta
+            respuestasUsuario[pregunta] = opcion;
+        }
+
+        function finalizarQuiz() {
+            let correctas = 0;
+            
+            // Evaluar respuestas y mostrar resultados
+            preguntas.forEach((pregunta, index) => {
+                const opciones = document.querySelectorAll(`[data-pregunta="${index}"]`);
+                const respuestaUsuario = respuestasUsuario[index];
+                
+                opciones.forEach((opcion, i) => {
+                    if (i === pregunta.correcta) {
+                        opcion.classList.add('correct');
+                    } else if (i === respuestaUsuario && i !== pregunta.correcta) {
+                        opcion.classList.add('incorrect');
+                    }
+                });
+                
+                // Mostrar explicación
+                document.getElementById(`explicacion-${index}`).style.display = 'block';
+                
+                // Contar correctas
+                if (respuestaUsuario === pregunta.correcta) {
+                    correctas++;
+                }
+            });
+            
+            puntuacion = correctas;
+            
+            // Mostrar resultado
+            const resultado = document.createElement('div');
+            resultado.className = 'quiz-resultado';
+            resultado.innerHTML = `
+                <h3>🎯 ¡Quiz Completado!</h3>
+                <div class="puntuacion">${correctas}/${preguntas.length}</div>
+                <p>Has respondido correctamente ${correctas} de ${preguntas.length} preguntas</p>
+                <p>${getPuntuacionMensaje(correctas, preguntas.length)}</p>
+                <button class="btn" onclick="mostrarSeccion('agradecimientos')" style="margin-top: 20px;">
+                    🎉 Ver Agradecimientos
+                </button>
+            `;
+            
+            document.getElementById('quiz-contenido').appendChild(resultado);
+            document.getElementById('btn-finalizar').style.display = 'none';
+        }
+
+        function getPuntuacionMensaje(correctas, total) {
+            const porcentaje = (correctas / total) * 100;
+            
+            if (porcentaje === 100) return "🏆 ¡Perfecto! Eres un experto en sistemas operativos";
+            if (porcentaje >= 80) return "🌟 ¡Excelente! Tienes un gran conocimiento";
+            if (porcentaje >= 60) return "👍 ¡Bien hecho! Vas por buen camino";
+            if (porcentaje >= 40) return "📚 Sigue estudiando, ¡puedes mejorar!";
+            return "💪 ¡No te rindas! La práctica hace al maestro";
+        }
+
+        function reiniciarApp() {
+            preguntaActual = 0;
+            respuestasUsuario = [];
+            puntuacion = 0;
+            mostrarSeccion('portada');
+        }
+
+        // Efectos adicionales
+        document.addEventListener('DOMContentLoaded', function() {
+            // Efecto de partículas en la portada
+            if (Math.random() > 0.5) {
+                console.log('🎮 ¡Bienvenido a Sistemas Quiz! 🎮');
+            }
+        });
+    </script>
+</body>
+</html>
